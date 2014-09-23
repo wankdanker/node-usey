@@ -1,0 +1,31 @@
+{
+  "name": "usey",
+  "version": "0.0.0",
+  "description": "Generic middleware/plugin framework inspired by express.js's .use()",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "Dan VerWeire",
+  "license": "MIT",
+  "devDependencies": {
+    "tape": "^3.0.0"
+  },
+  "dependencies": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wankdanker/node-usey"
+  },
+  "keywords": [
+    "use",
+    "middleware",
+    "plugin",
+    "chain",
+    "sequence"
+  ],
+  "bugs": {
+    "url": "https://github.com/wankdanker/node-usey/issues"
+  },
+  "homepage": "https://github.com/wankdanker/node-usey"
+}
