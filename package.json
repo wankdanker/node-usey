@@ -1,6 +1,6 @@
 {
   "name": "usey",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Generic middleware/plugin framework inspired by express.js's .use()",
   "main": "index.js",
   "scripts": {
@@ -11,8 +11,7 @@
   "devDependencies": {
     "tape": "^3.0.0"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/wankdanker/node-usey"
