@@ -1,6 +1,13 @@
 usey
 ----
 
+Generic middleware/plugin framework inspired by express.js's .use()
+
+about
+-----
+
+[![build status](https://secure.travis-ci.org/wankdanker/node-usey.png)](http://travis-ci.org/wankdanker/node-usey)
+
 This module generates a single function which when called will pass the values
 passed to it to each of the functions specified with the `.use()` method. If one
 of the functions passes an error to the `next()` function the main callback will
