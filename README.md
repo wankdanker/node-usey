@@ -64,6 +64,13 @@ var Usey = require('usey');
 var u = Usey(); //this creates the instance function
 ```
 
+The Usey constructor takes an options object with the following options:
+
+* context : this is the context (the `this` value) for each of the functions passed
+to the `use()` function and for the main callback.
+    * By default a new empty object created when calling the usey instance function
+    and that is used as the context for each function passed to `use()`
+
 ###Add middleware/plugins/functions
 
 When you call the `.use()` method, you may pass it a single function, an array

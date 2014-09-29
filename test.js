@@ -70,6 +70,60 @@ test('anonymous chaining', function (t) {
 	});
 });
 
+test('custom context', function (t) {
+	var ctx = { a : 0 };
+
+	t.plan(6);
+
+	u = usey({ context : ctx }).use(function (obj, cb) {
+		obj.a = this.a++;
+
+		return cb();
+	}).use(function (obj, cb) {
+		obj.b = this.a++;
+
+		return cb();
+	})
+
+	u({ x : 0 }, function (err, obj) {
+		t.equal(obj.a, 0);
+		t.equal(obj.b, 1);
+		t.equal(obj.x, 0);
+	});
+
+	u({ x : 0 }, function (err, obj) {
+		t.equal(obj.a, 2);
+		t.equal(obj.b, 3);
+		t.equal(obj.x, 0);
+
+		t.end();
+	});
+});
+
+test('unique context (default)', function (t) {
+	t.plan(2);
+
+	u = usey().use(function (obj, cb) {
+		this.a = this.a || 0;
+
+		return cb();
+	}).use(function (obj, cb) {
+		this.a += 1;
+
+		return cb();
+	});
+
+	u({ x : 0 }, function (err, obj) {
+		t.equal(this.a, 1);
+	});
+
+	u({ x : 0 }, function (err, obj) {
+		t.equal(this.a, 1);
+		t.end();
+	});
+
+});
+
 function add1 (obj, next) {
 	obj.x += 1;
 

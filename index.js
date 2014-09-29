@@ -1,7 +1,9 @@
-module.exports = Usey
+module.exports = Usey;
 
 function Usey (options) {
     var chain = [];
+
+    options = options || {};
 
     UseyInstance.use = use;
 
@@ -10,6 +12,7 @@ function Usey (options) {
     function UseyInstance () {
         var chainIndex = 0
             , sequenceIndex = 0
+            , context = options.context || {}
             , args = Array.prototype.slice.call(arguments)
             // if the last arg is a function then it's the callback
             , cb = (typeof args[args.length - 1] === 'function')
@@ -34,7 +37,7 @@ function Usey (options) {
                 args.pop();
                 //push the error into the callback args array
                 args.unshift(err || null);
-                return cb.apply(cb, args);
+                return cb.apply(context, args);
             }
 
             if (Array.isArray(fn)) {
@@ -47,7 +50,7 @@ function Usey (options) {
                 return nextInSequence();
             }
 
-            return fn.apply(UseyInstance, args);
+            return fn.apply(context, args);
         }
 
         function nextInSequence (err) {
@@ -77,7 +80,7 @@ function Usey (options) {
                 return next();
             }
 
-            return sfn.apply(UseyInstance, args);
+            return sfn.apply(context, args);
         }
     }
 
