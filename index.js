@@ -86,13 +86,42 @@ function Usey (options) {
     }
 
     function use (fn) {
+        var check;
+
         if (arguments.length > 1) {
-            chain.push(Array.prototype.slice.call(arguments));
+            fn = Array.prototype.slice.call(arguments)
         }
-        else {
-            chain.push(fn);
+        
+        check = validateUse(fn);
+
+        if (check) {
+            throw new Error(check);
         }
 
+        chain.push(fn);
+
         return UseyInstance;
+    }
+
+    function validateUse(fn) {
+        var result
+            , x = 0
+            ;
+
+        if (Array.isArray(fn)) {
+            for ( ; x < fn.length; x++ ) {
+                if (typeof fn[x] !== 'function') {
+                    result = 'Non-function argument found at index ' + x;
+                    break;
+                }
+            }
+        }
+        else {
+            if (typeof fn !== 'function') {
+                result = 'Non-function argument found at index 0';
+            }
+        }
+
+        return result;
     }
 }
