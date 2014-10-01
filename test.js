@@ -147,7 +147,7 @@ test('fn should not be global', function (t) {
 		.use(add3)
 	
 	u({ x : 0 }, function (err, obj) {
-		t.equal(typeof fn, 'undefined');
+		t.equal(global.hasOwnProperty('fn'), false, 'fn IS a global');
 		t.end();
 	});
 });
