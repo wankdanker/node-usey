@@ -124,6 +124,34 @@ test('unique context (default)', function (t) {
 
 });
 
+test('throws on non-function argument', function (t) {
+	t.plan(1);
+
+	t.throws(function () {
+		u = usey().use('asdf')
+			.use(function (obj, cb) {
+				return cb();
+			})
+	
+		u({ x : 0 }, function (err, obj) {
+		
+		});
+	}, /non-function argument/gi);
+});
+
+test('fn should not be global', function (t) {
+	t.plan(1);
+
+	u = usey().use(add1)
+		.use(add2)
+		.use(add3)
+	
+	u({ x : 0 }, function (err, obj) {
+		t.equal(typeof fn, 'undefined');
+		t.end();
+	});
+});
+
 function add1 (obj, next) {
 	obj.x += 1;
 
