@@ -18,6 +18,7 @@ function Usey (options) {
             , cb = (typeof args[args.length - 1] === 'function')
                 ? args.pop()
                 : null
+            , fn
             ;
 
         //or unshift
