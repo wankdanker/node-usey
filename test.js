@@ -160,11 +160,13 @@ test('special error chains', function (t) {
 	u = usey().use(add1)
 		.use(passAnError)
 		.use('error', function (err, obj, next) {
-			a.push(1);
-			t.equal(typeof err, 'object');
-			t.equal(err.message, 'Things did not work out');
+			setImmediate(function () {
+				a.push(1);
+				t.equal(typeof err, 'object');
+				t.equal(err.message, 'Things did not work out');
 
-			return next();
+				return next();
+			});
 		})
 		.use('error', function (err, obj, next) {
 			t.equal(typeof err, 'object');
