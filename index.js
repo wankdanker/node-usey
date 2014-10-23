@@ -57,7 +57,7 @@ function Usey (options) {
             
             fn = chain.chain[chain.index++];
            
-            if (!fn) {
+            if (!fn && chain.name != 'error') {
                 //reached the end of the chain at the top of the stack
                 //get to the next level of the stack and try again
                 pop();
