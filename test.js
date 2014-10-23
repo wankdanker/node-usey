@@ -36,6 +36,7 @@ test('passing an error to next()', function (t) {
 	u.use(add1)
 		.use(add2)
 		.use(passAnError)
+		.use(add3)
 	
 	u({ x : 0 }, function (err, obj) {
 		t.equal(err.message, 'Things did not work out')
@@ -128,7 +129,7 @@ test('throws on non-function argument', function (t) {
 	t.plan(1);
 
 	t.throws(function () {
-		u = usey().use('asdf')
+		u = usey().use('asdf','asdf')
 			.use(function (obj, cb) {
 				return cb();
 			})
@@ -151,6 +152,80 @@ test('fn should not be global', function (t) {
 		t.end();
 	});
 });
+
+test('special error chains', function (t) {
+	var a = [];
+	t.plan(6);
+	
+	u = usey().use(add1)
+		.use(passAnError)
+		.use('error', function (err, obj, next) {
+			a.push(1);
+			t.equal(typeof err, 'object');
+			t.equal(err.message, 'Things did not work out');
+
+			return next();
+		})
+		.use('error', function (err, obj, next) {
+			t.equal(typeof err, 'object');
+			t.equal(err.message, 'Things did not work out');
+
+			return next();
+		})
+		.use(add3);
+	
+	u({ x : 0 }, function (err, obj) {
+		a.push(2);
+		
+		t.deepEqual(a, [1,2]);
+		t.equal(typeof err, 'object');
+		t.end();
+	});
+});
+
+test('named chains', function (t) {
+	t.plan(1);
+
+	u = usey().use(add1, add2, add3)
+		.use('test', add3)
+		.use('test2', add1)
+		.use(function (obj, next) {
+			return next('test');
+		})
+		.use(add2);
+	
+	u({ x : 0 }, function (err, obj) {
+		t.equal(obj.x, 11);
+		t.end();
+	});
+});
+
+test('stack and named chaing usage', function (t) {
+	u = usey();
+
+	u.use('a', function (obj, next) {
+		obj.x += 1;
+
+		return next();
+	}, function (obj, next) {
+		if (obj.x > 5) {
+			return next('exit'); //exit is arbitrary, it's just a non existent named chain
+		}
+
+		//create a loop
+		return next('a');
+	});
+	
+	u.use(function (obj, next) {
+		return next('a');
+	});
+
+	u({ x : 0 }, function (err, obj) {
+		t.equal(obj.x, 6);
+		t.end();
+	});
+});
+
 
 function add1 (obj, next) {
 	obj.x += 1;
