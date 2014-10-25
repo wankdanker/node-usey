@@ -110,6 +110,72 @@ u(obj, function (err, obj) {
 });
 ```
 
+Named Function Chains
+---------------------
+
+You may call the `.use()` method passing it a string as the first argument. That
+string should be the name of a chain. You can then call that chain from another.
+
+The named chain `error` is a special named chain that will be called if an error
+is passed to the `next()` callback at any time. The `error` named chain will be
+processed before the main callback will be called. This is helpful for cleaning up
+after errors have occurred.
+
+```js
+var u = Usey();
+
+u.use(openDatabase('mydatabase'));
+u.use(beginTransaction);
+u.use(insertOrderHeader);
+u.use(insertOrderItems);
+u.use(commitTransaction);
+u.use(goto('finally'));
+u.use('finally', closeDatabase);
+u.use('finally', closeRedis);
+u.use('error', rollbackTransaction);
+u.use('error', goto('finally'));
+
+u(order, function (err) {
+	//done
+});
+
+function openDatabase(db) {
+	return function () {
+		var self = this
+			, next = getNext(arguments);
+
+		//this is hypothetical
+		mysql.open(db, function (err, client) {
+			if (err) {
+				return next(err);
+			}
+
+			self.db = client;
+
+			return next();
+		});
+	}
+}
+
+function beginTransaction() {
+	var next = getNext(arguments);
+	
+	this.db.beginTransaction(next);
+}
+
+function goto(name) {
+	return function () {
+		var next = getNext(arguments);
+
+		next(name);
+	}
+};
+
+function getNext(a) {
+	return a[a.length -1];
+}
+```
+
 http server example
 -------------------
 
