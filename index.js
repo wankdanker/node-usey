@@ -37,6 +37,14 @@ function Usey (options) {
             if (err) {
                 if (typeof err === 'string') {
                     if (chains[err]) {
+                        //if there are no functions left in the current
+                        //chain, then we can get pop this chain off the
+                        //stack before pushing the next chain. 
+                        //pseudo-tail-call
+                        if (chain.index > chain.chain.length) {
+                            pop();
+                        }
+
                         //load the named chain on to the stack
                         push(chains[err], err);
                     }
