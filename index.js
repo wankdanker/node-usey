@@ -1,9 +1,12 @@
 module.exports = Usey;
 
 function Usey (options) {
-    var chains = {};
+    var root = []
+        , chains
+        ;
 
     options = options || {};
+    chains = options.chains || {};
 
     UseyInstance.use = use;
 
@@ -26,7 +29,7 @@ function Usey (options) {
         //or unshift
         args.push(next);
 
-        push(chains[null], null);
+        push(root, null);
 
         next();
 
@@ -54,10 +57,15 @@ function Usey (options) {
             }
 
             chain = top();
-            
-            fn = chain.chain[chain.index++];
+
+            if (!chain) {
+                fn = null;
+            }
+            else {
+                fn = chain.chain[chain.index++];
+            }
            
-            if (!fn && chain.name != 'error') {
+            if (!fn && chain && chain.name != 'error') {
                 //reached the end of the chain at the top of the stack
                 //get to the next level of the stack and try again
                 pop();
@@ -65,9 +73,6 @@ function Usey (options) {
                 
                 if (chain) {
                     fn = chain.chain[chain.index++];
-                }
-                else {
-                    fn = null;
                 }
             }
 
@@ -91,60 +96,12 @@ function Usey (options) {
                 return cb.apply(context, args);
             }
 
-            if (Array.isArray(fn)) {
-                chain.seqIndex = 0;
-                args.pop();
-                args.push(nextInSequence);
-
-                return nextInSequence();
-            }
-
             return fn.apply(context, args);
         }
 
-        function nextInSequence (err) {
-            if (err && typeof err === 'object') {
-                //if there is an error, just go back to the next function
-                //and let it handle exiting
-                //we only want to do that when it is an object, because
-                //a string may be passed to this function to exit the
-                //sequence and move on to the next link in the chain
-
-                return next(err);
-            }
-
-            var sfn = fn[chain.seqIndex++];
-
-            if (err && typeof err === 'string') {
-                //if a string is passed instead of err, then we 
-                //need to jump out of the sequence early or jump to
-                //the named chain if it exists. We can fake exiting
-                //by forcing the sequence function to null
-
-                if (chains[err]) {
-                    args.pop();
-                    args.push(next);
-
-                    return next(err);
-                }
-                else {
-                    sfn = null;
-                }
-            }
-
-            if (!sfn) {
-                //prepare for going to processing each chain index
-                args.pop();
-                args.push(next);
-                
-                return next();
-            }
-
-            return sfn.apply(context, args);
-        }
 
         function push (chain, name) {
-            var c = { chain : chain, index : 0, seqIndex : 0, name : name };
+            var c = { chain : chain, index : 0, name : name };
 
             stack.push(c);
 
@@ -161,14 +118,16 @@ function Usey (options) {
     }
 
     function use (fn) {
-        var check, args, chain, name = null, u;
+        var check, args, chain, name, u;
 
         if (typeof fn === 'string') {
             name = fn;
+            chain = chains[name] = chains[name] || [];
+        }
+        else {
+            chain = root;
         }
 
-        chain = chains[name] = chains[name] || [];
-        
         if (arguments.length > 1) {
             fn = Array.prototype.slice.call(arguments)
 
@@ -186,11 +145,20 @@ function Usey (options) {
             throw new Error(check);
         }
 
-        if (name) {
-            //push a new usey instance
-            //u = Usey({ context : 'this' });
-            //u.use(fn);
-            chain.push(fn);
+        if (Array.isArray(fn)) {
+            if (fn.length > 1) {
+                //push a new usey instance
+                u = Usey({ context : 'this', chains : chains });
+            
+                fn.forEach(function (f) {
+                    u.use(f);
+                });
+    
+                chain.push(u);
+            }
+            else {
+                chain.push(fn[0]);
+            }
         }
         else {
             chain.push(fn);
