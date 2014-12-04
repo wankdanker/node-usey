@@ -37,6 +37,8 @@ function Usey (options) {
             , fn
             , stack = []
             , chain
+            , timedout = 0
+            , timeout
             ;
 
         //or unshift
@@ -47,6 +49,10 @@ function Usey (options) {
         next();
 
         function next (err) {
+	        if (timeout) {
+                clearTimeout(timeout);
+            }
+
             if (err) {
                 if (typeof err === 'string') {
                     if (chains[err]) {
@@ -125,7 +131,20 @@ function Usey (options) {
                     args.unshift(err || null);
                 }
 
-                return cb.apply(context, args);
+                cb.apply(context, args);
+
+                //prevent cb from being called again
+                cb = null;
+
+                return;
+            }
+
+            if (options.timeout) {
+                timeout = setTimeout(function () {
+                    timedout += 1;
+
+                    return next(new Error('usey encountered a timeout'));
+                }, options.timeout);
             }
 
             return fn.apply(context, args);

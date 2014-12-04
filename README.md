@@ -103,6 +103,8 @@ The Usey constructor takes an options object with the following options:
 to the `use()` function and for the main callback.
     * By default a new empty object created when calling the usey instance function
     and that is used as the context for each function passed to `use()`
+* timeout : a numeric value that specifies the maximum number of milliseconds to wait
+for any of the .use() specified functions to callback
 
 ###Add middleware/plugins/functions
 
@@ -116,7 +118,7 @@ u.use(fn5, fn6, fn7, fn8);
 u.use(fn9);
 ```
 
-###Calling the main function
+###Call the main function
 
 Now when you call `u(arg1, arg2, arg3, ..., function (err, arg1, arg2, arg3, ...){})`,
 it will in turn call, in order:
@@ -153,12 +155,6 @@ The named chain `error` is a special named chain that will be called if an error
 is passed to the `next()` callback at any time. The `error` named chain will be
 processed before the main callback will be called. This is helpful for cleaning up
 after errors have occurred.
-
-Special `next(values)`
---------------------
-
-
-
 
 ```js
 var u = Usey();

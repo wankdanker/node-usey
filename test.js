@@ -148,7 +148,7 @@ test('fn should not be global', function (t) {
 		.use(add3)
 	
 	u({ x : 0 }, function (err, obj) {
-		t.equal(global.hasOwnProperty('fn'), false, 'fn IS a global');
+		t.equal(global.hasOwnProperty('fn'), false, 'fn is not a global');
 		t.end();
 	});
 });
@@ -241,6 +241,24 @@ test('special exit next value to get out of deep stack; goto; getNext', function
 
 	u({ x : 0 }, function (err, obj) {
 		console.log(err);
+		t.equal(obj.x, 3);
+		t.end();
+	});
+});
+
+test('test timeout option', function (t) {
+	t.plan(2);
+
+	u = usey({ timeout : 100 });
+
+	u.use(add1, add1, add1);
+	u.use(function (obj, next) {
+		setTimeout(next, 200)
+	});
+	u.use(add3);
+
+	u({ x : 0 }, function (err, obj) {
+		t.equal(err && err.message, 'usey encountered a timeout', 'error message is correct');
 		t.equal(obj.x, 3);
 		t.end();
 	});
