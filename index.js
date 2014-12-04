@@ -1,5 +1,18 @@
 module.exports = Usey;
 
+Usey.getNext = function (args) {
+    //for simplicity, return the last argument assuming it is the next function
+    //TODO: check name of function is next, try other arg slots if not found
+    return args[args.length - 1];
+};
+
+Usey.goto = function (destination) {
+    return function () {
+        //get the `next` callback and call it with destination;
+        Usey.getNext(arguments)(destination);
+    };
+};
+
 function Usey (options) {
     var root = []
         , chains
@@ -47,13 +60,24 @@ function Usey (options) {
 
                         //load the named chain on to the stack
                         push(chains[err], err);
+
+                        return next();
+                    }
+                    else if (err === 'exit') {
+                        //it has been requested that we exit; this is
+                        //a non-error situation where it was requested
+                        //that we exit all stacks and just call the callback
+                        stack = [];
+
+                        //we don't call next, because we want to fall through
+                        //to calling the callback
                     }
                     else {
                         //pop off the top of the stack
                         pop();
-                    }
 
-                    return next();
+                        return next();
+                    }
                 }
                 else if (chains.error) {
                     stack = [];

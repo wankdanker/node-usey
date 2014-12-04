@@ -211,7 +211,7 @@ test('stack and named chaing usage', function (t) {
 		return next();
 	}, function (obj, next) {
 		if (obj.x > 5) {
-			return next('exit'); //exit is arbitrary, it's just a non existent named chain
+			return next('quit'); //quit is arbitrary, it's just a non existent named chain
 		}
 
 		//create a loop
@@ -228,6 +228,23 @@ test('stack and named chaing usage', function (t) {
 	});
 });
 
+test('special exit next value to get out of deep stack; goto; getNext', function (t) {
+	t.plan(1);
+
+	u = usey();
+
+	u.use('a', add1, usey.goto('b'), add3);
+	u.use('b', add1, usey.goto('c'), add3);
+	u.use('c', add1, usey.goto('d'), add3);
+	u.use('d', usey.goto('exit'), add3);
+	u.use(usey.goto('a'));
+
+	u({ x : 0 }, function (err, obj) {
+		console.log(err);
+		t.equal(obj.x, 3);
+		t.end();
+	});
+});
 
 function add1 (obj, next) {
 	obj.x += 1;

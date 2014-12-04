@@ -51,6 +51,39 @@ app({ x : 0 }, { y : 0 }, function (err, obj1, obj2) {
 });
 ```
 
+named chains example
+--------------------
+
+```js
+var Usey = require('usey');
+
+var app = Usey();
+
+//do a thing, and then goto cleanup 
+//going to cleanup because of this is not going to happen
+//because doThing is going to throw an error
+app.use(doThing, Usey.goto('cleanup'));
+
+//use the goto helper to jump to the cleanup chain when 
+//and if the error chain gets hit
+app.use('error', Usey.goto('cleanup'))
+app.use('cleanup', doCleanup)
+
+app({ x : 0 }, function (err, obj) {
+
+});
+
+function doThing (obj, next) {
+	//throwing an error will cause the 'error' chain
+	//to be called
+	return next(new Error("this thing failed"));
+}
+
+function doCleanup (obj, next) {
+	return next();
+}
+```
+
 usage
 -----
 
@@ -120,6 +153,12 @@ The named chain `error` is a special named chain that will be called if an error
 is passed to the `next()` callback at any time. The `error` named chain will be
 processed before the main callback will be called. This is helpful for cleaning up
 after errors have occurred.
+
+Special `next(values)`
+--------------------
+
+
+
 
 ```js
 var u = Usey();
