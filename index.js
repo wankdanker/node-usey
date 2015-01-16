@@ -22,6 +22,7 @@ function Usey (options) {
     chains = options.chains || {};
 
     UseyInstance.use = use;
+    UseyInstance.unuse = unuse;
 
     return UseyInstance;
 
@@ -49,7 +50,7 @@ function Usey (options) {
         next();
 
         function next (err) {
-	        if (timeout) {
+            if (timeout) {
                 clearTimeout(timeout);
             }
 
@@ -242,5 +243,46 @@ function Usey (options) {
         }
 
         return result;
+    }
+
+    function unuse(fn, recurse) {
+        var index
+            , tmp
+            , remove
+            ;
+
+        if (fn === true) {
+            fn = null;
+            recurse = true;
+        }
+
+        //if no fn is passed, unuse all functions
+        if (!fn) {
+            if (recurse) {
+                root.forEach(function (fn) {
+                    if (fn.name === 'UseyInstance') {
+                        fn.unuse(true);
+                    }
+                });
+            }
+            
+            root.length = 0;
+    
+            return;
+        }
+
+        if (recurse) {
+            //look for UseyInstances to recurse into
+            root.filter(function (checkfn, index) {
+                if (checkfn.name === 'UseyInstance') {
+                    checkfn.unuse(fn, true);
+                };
+            });
+        }
+
+        //remove all instances of fn
+        while (~(index = root.indexOf(fn))) {
+            root.splice(index, 1);
+        }
     }
 }

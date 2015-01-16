@@ -264,6 +264,40 @@ test('test timeout option', function (t) {
 	});
 });
 
+test('unuse() should clear out the chain', function (t) {
+	u = usey();
+
+	u.use(add1, add1, add1);
+	u.use(add3);
+
+	u({ x : 0 }, function (err, obj) {
+		t.equal(obj.x, 6);
+
+		u.unuse();
+		u({x : 0}, function (err, obj) {
+			t.equal(obj.x, 0);
+			t.end();
+		});
+	});
+});
+
+test('unuse(add1, true) should remove all add1 functions', function (t) {
+	u = usey();
+
+	u.use(add1, add1, add1);
+	u.use(add3);
+
+	u({ x : 0 }, function (err, obj) {
+		t.equal(obj.x, 6);
+
+		u.unuse(add1, true);
+		u({x : 0}, function (err, obj) {
+			t.equal(obj.x, 3);
+			t.end();
+		});
+	});
+});
+
 function add1 (obj, next) {
 	obj.x += 1;
 
