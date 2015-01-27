@@ -268,7 +268,7 @@ function Usey (options) {
             
             root.length = 0;
     
-            return;
+            return UseyInstance;
         }
 
         if (recurse) {
@@ -284,5 +284,7 @@ function Usey (options) {
         while (~(index = root.indexOf(fn))) {
             root.splice(index, 1);
         }
+
+        return UseyInstance;
     }
 }
