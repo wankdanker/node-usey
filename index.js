@@ -95,6 +95,12 @@ function Usey (options) {
                 }
             }
 
+            //do some accounting;
+            if (fn) {
+                fn._exit += 1;
+                fn._pending -= 1;
+            }
+
             chain = top();
 
             if (!chain) {
@@ -148,9 +154,10 @@ function Usey (options) {
                 }, options.timeout);
             }
 
+            fn._enter += 1;
+            fn._pending += 1;
             return fn.apply(context, args);
         }
-
 
         function push (chain, name) {
             var c = { chain : chain, index : 0, name : name };
@@ -203,20 +210,28 @@ function Usey (options) {
                 u = Usey({ context : 'this', chains : chains });
             
                 fn.forEach(function (f) {
-                    u.use(f);
+                    u.use(initializefn(f));
                 });
     
                 chain.push(u);
             }
             else {
-                chain.push(fn[0]);
+                chain.push(initializefn(fn[0]));
             }
         }
         else {
-            chain.push(fn);
+            chain.push(initializefn(fn));
         }
 
         return UseyInstance;
+    }
+
+    function initializefn (fn) {
+        fn._enter = 0;
+        fn._exit = 0;
+        fn._pending = 0;
+
+        return fn;
     }
 
     function validateUse(fn) {
@@ -245,6 +260,15 @@ function Usey (options) {
         return result;
     }
 
+
+    //TODO: use fn._enter, fn._exit and fn._pending to determine if we
+    //should remove later functions in a chain. The fear is that some caller
+    //might be in the middle of a chain and then have the rug pulled out from
+    //underneath them. They'll not be able to finish what they are doing.
+    //Using the accounting numbers, we can make an attempt to wait a timeout
+    //before unloading functions if they have _pending > 0. We can also look
+    //at _enter and _exit to see if the function typically does not get a 
+    //callback to next()
     function unuse(fn, recurse) {
         var index
             , tmp
