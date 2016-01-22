@@ -80,7 +80,7 @@ function Usey (options) {
                         //it has been requested that we exit; this is
                         //a non-error situation where it was requested
                         //that we exit all stacks and just call the callback
-                        stack = [];
+                        stack = null;
 
                         //we don't call next, because we want to fall through
                         //to calling the callback
@@ -149,6 +149,10 @@ function Usey (options) {
                 //prevent cb from being called again
                 cb = null;
 
+		//clean up
+		stack = null;
+		UseyInstance = null;
+
                 return;
             }
 
@@ -174,7 +178,7 @@ function Usey (options) {
         }
 
         function top () {
-            return stack[stack.length - 1];
+            return (!stack) ? null : stack[stack.length - 1];
         }
 
         function pop () {
