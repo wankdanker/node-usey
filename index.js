@@ -13,6 +13,12 @@ Usey.goto = function (destination) {
     };
 };
 
+Usey.next = function () {
+    return function () {
+        Usey.getNext(arguments)();
+    };
+};
+
 function Usey (options) {
     var root = []
         , chains
