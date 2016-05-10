@@ -1,3 +1,5 @@
+var EventEmitter = require('events').EventEmitter;
+
 module.exports = Usey;
 
 Usey.getNext = function (args) {
@@ -29,6 +31,7 @@ function Usey (options) {
 
     UseyInstance.use = use;
     UseyInstance.unuse = unuse;
+    UseyInstance.events = new EventEmitter();
 
     return UseyInstance;
 
@@ -65,7 +68,7 @@ function Usey (options) {
                     if (chains[err]) {
                         //if there are no functions left in the current
                         //chain, then we can get pop this chain off the
-                        //stack before pushing the next chain. 
+                        //stack before pushing the next chain.
                         //pseudo-tail-call
                         if (chain.index > chain.chain.length) {
                             pop();
@@ -96,7 +99,7 @@ function Usey (options) {
                     stack = [];
                     push(chains.error, 'error');
                     args.unshift(err);
-    
+
                     return next();
                 }
             }
@@ -115,13 +118,13 @@ function Usey (options) {
             else {
                 fn = chain.chain[chain.index++];
             }
-           
+
             if (!fn && chain && chain.name != 'error') {
                 //reached the end of the chain at the top of the stack
                 //get to the next level of the stack and try again
                 pop();
                 chain = top();
-                
+
                 if (chain) {
                     fn = chain.chain[chain.index++];
                 }
@@ -207,7 +210,7 @@ function Usey (options) {
                 fn.shift();
             }
         }
-        
+
         check = validateUse(fn);
 
         if (check) {
@@ -218,11 +221,11 @@ function Usey (options) {
             if (fn.length > 1) {
                 //push a new usey instance
                 u = Usey({ context : 'this', chains : chains });
-            
+
                 fn.forEach(function (f) {
                     u.use(initializefn(f));
                 });
-    
+
                 chain.push(u);
             }
             else {
@@ -277,7 +280,7 @@ function Usey (options) {
     //underneath them. They'll not be able to finish what they are doing.
     //Using the accounting numbers, we can make an attempt to wait a timeout
     //before unloading functions if they have _pending > 0. We can also look
-    //at _enter and _exit to see if the function typically does not get a 
+    //at _enter and _exit to see if the function typically does not get a
     //callback to next()
     function unuse(fn, recurse) {
         var index
@@ -299,9 +302,9 @@ function Usey (options) {
                     }
                 });
             }
-            
+
             root.length = 0;
-    
+
             return UseyInstance;
         }
 

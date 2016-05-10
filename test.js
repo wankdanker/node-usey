@@ -5,7 +5,7 @@ test('straight forward usage', function (t) {
 	t.plan(1);
 
 	var u = usey();
-	
+
 	u.use(add1).use(add2).use(add3);
 
 	u({ x : 0 }, function (err, obj) {
@@ -21,7 +21,7 @@ test('using a sequence', function (t) {
 
 	u.use(add1, add2, add3)
 		.use(add1, add2, add3)
-	
+
 	u({ x : 0 }, function (err, obj) {
 		t.equal(obj.x, 12);
 		t.end();
@@ -37,7 +37,7 @@ test('passing an error to next()', function (t) {
 		.use(add2)
 		.use(passAnError)
 		.use(add3)
-	
+
 	u({ x : 0 }, function (err, obj) {
 		t.equal(err.message, 'Things did not work out')
 		t.equal(obj.x, 3);
@@ -133,9 +133,9 @@ test('throws on non-function argument', function (t) {
 			.use(function (obj, cb) {
 				return cb();
 			})
-	
+
 		u({ x : 0 }, function (err, obj) {
-		
+
 		});
 	}, /non-function argument/gi);
 });
@@ -146,7 +146,7 @@ test('fn should not be global', function (t) {
 	u = usey().use(add1)
 		.use(add2)
 		.use(add3)
-	
+
 	u({ x : 0 }, function (err, obj) {
 		t.equal(global.hasOwnProperty('fn'), false, 'fn is not a global');
 		t.end();
@@ -156,7 +156,7 @@ test('fn should not be global', function (t) {
 test('special error chains', function (t) {
 	var a = [];
 	t.plan(6);
-	
+
 	u = usey().use(add1)
 		.use(passAnError)
 		.use('error', function (err, obj, next) {
@@ -175,10 +175,10 @@ test('special error chains', function (t) {
 			return next();
 		})
 		.use(add3);
-	
+
 	u({ x : 0 }, function (err, obj) {
 		a.push(2);
-		
+
 		t.deepEqual(a, [1,2]);
 		t.equal(typeof err, 'object');
 		t.end();
@@ -195,7 +195,7 @@ test('named chains', function (t) {
 			return next('test');
 		})
 		.use(add2);
-	
+
 	u({ x : 0 }, function (err, obj) {
 		t.equal(obj.x, 11);
 		t.end();
@@ -217,7 +217,7 @@ test('stack and named chaing usage', function (t) {
 		//create a loop
 		return next('a');
 	});
-	
+
 	u.use(function (obj, next) {
 		return next('a');
 	});
@@ -295,6 +295,41 @@ test('unuse(add1, true) should remove all add1 functions', function (t) {
 			t.equal(obj.x, 3);
 			t.end();
 		});
+	});
+});
+
+test('events.on() and events.emit() should work', function (t) {
+	t.plan(3);
+
+	u = usey();
+
+	u.events.on('step1', function (val) {
+		t.deepEqual(val, { x : 0 });
+	});
+
+	u.events.on('step2', function (val) {
+		t.deepEqual(val, { x : 1 });
+	});
+
+	u.use(function (a, next) {
+		u.events.emit('step1', a);
+
+		a.x += 1;
+
+		return next();
+	});
+
+	u.use(function (b, next) {
+		u.events.emit('step2', b);
+
+		b.x += 1;
+
+		return next();
+	});
+
+	u({ x : 0 }, function (err, obj) {
+		t.deepEqual(obj, { x : 2 });
+		t.end();
 	});
 });
 
