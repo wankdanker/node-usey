@@ -4,7 +4,7 @@ var usey = require('./');
 test('straight forward usage', function (t) {
 	t.plan(1);
 
-	var u = usey();
+	var u = usey({ stackNames : true });
 
 	u.use(add1).use(add2).use(add3);
 
@@ -17,7 +17,7 @@ test('straight forward usage', function (t) {
 test('using a sequence', function (t) {
 	t.plan(1);
 
-	var u = usey();
+	var u = usey({ stackNames : true });
 
 	u.use(add1, add2, add3)
 		.use(add1, add2, add3)
@@ -31,7 +31,7 @@ test('using a sequence', function (t) {
 test('passing an error to next()', function (t) {
 	t.plan(2);
 
-	var u = usey();
+	var u = usey({ stackNames : true });
 
 	u.use(add1)
 		.use(add2)
@@ -48,7 +48,7 @@ test('passing an error to next()', function (t) {
 test('exit a sequence early', function (t) {
 	t.plan(2);
 
-	var u = usey();
+	var u = usey({ stackNames : true });
 
 	u.use(add1, add2, add3)
 		.use(add1, exitSequence, add2, add3)
@@ -64,7 +64,7 @@ test('exit a sequence early', function (t) {
 test('anonymous chaining', function (t) {
 	t.plan(1);
 
-	usey().use(add1).use(add2).use(add3)
+	usey({ stackNames : true }).use(add1).use(add2).use(add3)
 	({ x : 0 }, function (err, obj) {
 		t.equal(obj.x, 6);
 		t.end();
@@ -76,7 +76,7 @@ test('custom context', function (t) {
 
 	t.plan(6);
 
-	u = usey({ context : ctx }).use(function (obj, cb) {
+	u = usey({ context : ctx, stackNames : true }).use(function (obj, cb) {
 		obj.a = this.a++;
 
 		return cb();
@@ -104,7 +104,7 @@ test('custom context', function (t) {
 test('unique context (default)', function (t) {
 	t.plan(2);
 
-	u = usey().use(function (obj, cb) {
+	u = usey({ stackNames : true }).use(function (obj, cb) {
 		this.a = this.a || 0;
 
 		return cb();
@@ -129,7 +129,7 @@ test('throws on non-function argument', function (t) {
 	t.plan(1);
 
 	t.throws(function () {
-		u = usey().use('asdf','asdf')
+		u = usey({ stackNames : true }).use('asdf','asdf')
 			.use(function (obj, cb) {
 				return cb();
 			})
@@ -143,7 +143,7 @@ test('throws on non-function argument', function (t) {
 test('fn should not be global', function (t) {
 	t.plan(1);
 
-	u = usey().use(add1)
+	u = usey({ stackNames : true }).use(add1)
 		.use(add2)
 		.use(add3)
 
@@ -157,7 +157,7 @@ test('special error chains', function (t) {
 	var a = [];
 	t.plan(6);
 
-	u = usey().use(add1)
+	u = usey({ stackNames : true }).use(add1)
 		.use(passAnError)
 		.use('error', function (err, obj, next) {
 			setImmediate(function () {
@@ -188,7 +188,7 @@ test('special error chains', function (t) {
 test('named chains', function (t) {
 	t.plan(1);
 
-	u = usey().use(add1, add2, add3)
+	u = usey({ stackNames : true }).use(add1, add2, add3)
 		.use('test', add3)
 		.use('test2', add1)
 		.use(function (obj, next) {
@@ -203,7 +203,7 @@ test('named chains', function (t) {
 });
 
 test('stack and named chaing usage', function (t) {
-	u = usey();
+	u = usey({ stackNames : true });
 
 	u.use('a', function (obj, next) {
 		obj.x += 1;
@@ -231,7 +231,7 @@ test('stack and named chaing usage', function (t) {
 test('special exit next value to get out of deep stack; goto; getNext', function (t) {
 	t.plan(1);
 
-	u = usey();
+	u = usey({ stackNames : true });
 
 	u.use('a', add1, usey.goto('b'), add3);
 	u.use('b', add1, usey.goto('c'), add3);
@@ -249,7 +249,7 @@ test('special exit next value to get out of deep stack; goto; getNext', function
 test('test timeout option', function (t) {
 	t.plan(2);
 
-	u = usey({ timeout : 100 });
+	u = usey({ timeout : 100, stackNames : true });
 
 	u.use(add1, add1, add1);
 	u.use(function (obj, next) {
@@ -265,7 +265,7 @@ test('test timeout option', function (t) {
 });
 
 test('unuse() should clear out the chain', function (t) {
-	u = usey();
+	u = usey({ stackNames : true });
 
 	u.use(add1, add1, add1);
 	u.use(add3);
@@ -282,7 +282,7 @@ test('unuse() should clear out the chain', function (t) {
 });
 
 test('unuse(add1, true) should remove all add1 functions', function (t) {
-	u = usey();
+	u = usey({ stackNames : true });
 
 	u.use(add1, add1, add1);
 	u.use(add3);
@@ -301,7 +301,7 @@ test('unuse(add1, true) should remove all add1 functions', function (t) {
 test('events.on() and events.emit() should work', function (t) {
 	t.plan(3);
 
-	u = usey();
+	u = usey({ stackNames : true });
 
 	u.events.on('step1', function (val) {
 		t.deepEqual(val, { x : 0 });
