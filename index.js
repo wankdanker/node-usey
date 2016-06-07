@@ -1,7 +1,13 @@
 var debug = require('debug')('usey');
+var dephault = require('./dephault');
 var EventEmitter = require('events').EventEmitter;
 
 module.exports = Usey;
+
+Usey.defaults = {
+  debug : debug
+  , stackNames : false
+};
 
 Usey.getNext = function (args) {
     //for simplicity, return the last argument assuming it is the next function
@@ -29,6 +35,9 @@ function Usey (options) {
 
     options = options || {};
     chains = options.chains || {};
+
+    options.debug = dephault(options, 'debug', Usey.defaults.debug);
+    options.stackNames = dephault(options, 'stackNames', Usey.defaults.stackNames);
 
     UseyInstance.use = use;
     UseyInstance.unuse = unuse;

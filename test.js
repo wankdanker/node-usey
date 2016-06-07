@@ -1,6 +1,8 @@
 var test = require('tape');
 var usey = require('./');
 
+usey.defaults.stackNames = true;
+
 test('straight forward usage', function (t) {
 	t.plan(1);
 
