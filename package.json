@@ -1,6 +1,6 @@
 {
   "name": "usey",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Generic middleware/plugin framework inspired by express.js's .use()",
   "main": "index.js",
   "scripts": {
