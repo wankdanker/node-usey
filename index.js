@@ -270,6 +270,12 @@ function Usey (options) {
               }
             }
 
+            for (; i < stack.length; i++) {
+                if (!~stack[i].indexOf('usey')) {
+                  break;
+                }
+            }
+
             fn._name = fn._name || (fn.name || 'anonymous') + stack[i].trim().replace('at ', ' from ');
         }
 
