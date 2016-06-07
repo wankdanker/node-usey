@@ -154,9 +154,9 @@ function Usey (options) {
                 //prevent cb from being called again
                 cb = null;
 
-		//clean up
-		stack = null;
-		UseyInstance = null;
+            		//clean up
+            		stack = null;
+            		UseyInstance = null;
 
                 return;
             }
