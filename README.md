@@ -59,12 +59,12 @@ var Usey = require('usey');
 
 var app = Usey();
 
-//do a thing, and then goto cleanup 
+//do a thing, and then goto cleanup
 //going to cleanup because of this is not going to happen
 //because doThing is going to throw an error
 app.use(doThing, Usey.goto('cleanup'));
 
-//use the goto helper to jump to the cleanup chain when 
+//use the goto helper to jump to the cleanup chain when
 //and if the error chain gets hit
 app.use('error', Usey.goto('cleanup'))
 app.use('cleanup', doCleanup)
@@ -99,12 +99,16 @@ var u = Usey(); //this creates the instance function
 
 The Usey constructor takes an options object with the following options:
 
-* context : this is the context (the `this` value) for each of the functions passed
+* context : [object] this is the context (the `this` value) for each of the functions passed
 to the `use()` function and for the main callback.
     * By default a new empty object created when calling the usey instance function
     and that is used as the context for each function passed to `use()`
-* timeout : a numeric value that specifies the maximum number of milliseconds to wait
+* timeout : [number] a numeric value that specifies the maximum number of milliseconds to wait
 for any of the .use() specified functions to callback
+* stackNames : [boolean] if true, when `.use()` is called, we will use stack traces
+to determine where the function was defined. This information is used when debugging
+* debug : [function] an optional function that will be called with debug information.
+If not defined, it defaults to using the `debug` module.
 
 ###Add middleware/plugins/functions
 
@@ -194,7 +198,7 @@ function openDatabase(db) {
 
 function beginTransaction() {
 	var next = getNext(arguments);
-	
+
 	this.db.beginTransaction(next);
 }
 
@@ -216,7 +220,7 @@ http server example
 
 ```js
 var Usey = require('usey')
-   , responseTime = require('response-time') 
+   , responseTime = require('response-time')
    ;
 
 var app = Usey();

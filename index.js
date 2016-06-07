@@ -1,3 +1,4 @@
+var debug = require('debug')('usey');
 var EventEmitter = require('events').EventEmitter;
 
 module.exports = Usey;
@@ -49,6 +50,7 @@ function Usey (options) {
             , chain
             , timedout = 0
             , timeout
+            , dbg = options.debug || debug
             ;
 
         //or unshift
@@ -169,6 +171,9 @@ function Usey (options) {
 
             fn._enter += 1;
             fn._pending += 1;
+
+            dbg('Calling: ', fn._name || fn.name);
+
             return fn.apply(context, args);
         }
 
@@ -240,9 +245,24 @@ function Usey (options) {
     }
 
     function initializefn (fn) {
+        var stack;
+
         fn._enter = 0;
         fn._exit = 0;
         fn._pending = 0;
+
+        if (options.stackNames && !fn._name) {
+            stack = new Error('').stack.split('\n');
+
+            for (var i = 0; i < stack.length; i++) {
+              if (~stack[i].indexOf('at Function.use')) {
+                i ++;
+                break;
+              }
+            }
+
+            fn._name = fn._name || (fn.name || 'anonymous') + stack[i].trim().replace('at ', ' from ');
+        }
 
         return fn;
     }
