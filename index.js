@@ -67,7 +67,7 @@ function Usey (options) {
 
         push(root, null);
 
-        next();
+        return next();
 
         function next (err) {
             if (timeout) {
@@ -158,7 +158,7 @@ function Usey (options) {
                     args.unshift(err || null);
                 }
 
-                cb.apply(context, args);
+                var r = cb.apply(context, args);
 
                 //prevent cb from being called again
                 cb = null;
@@ -167,7 +167,7 @@ function Usey (options) {
             		stack = null;
             		UseyInstance = null;
 
-                return;
+                return r;
             }
 
             if (options.timeout) {
