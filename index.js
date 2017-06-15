@@ -1,11 +1,10 @@
-var debug = require('debug')('usey');
 var dephault = require('./dephault');
 var EventEmitter = require('events').EventEmitter;
 
 module.exports = Usey;
 
 Usey.defaults = {
-  debug : debug
+  debug : noop
   , stackNames : false
 };
 
@@ -360,3 +359,6 @@ function Usey (options) {
         return UseyInstance;
     }
 }
+
+function noop () {}
+
