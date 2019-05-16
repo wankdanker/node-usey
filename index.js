@@ -27,6 +27,13 @@ Usey.next = function () {
     };
 };
 
+
+/**
+ * Create a new instance of a Usey chain
+ *
+ * @param {*} options
+ * @returns
+ */
 function Usey (options) {
     var root = []
         , chains
@@ -40,6 +47,8 @@ function Usey (options) {
 
     UseyInstance.use = use;
     UseyInstance.unuse = unuse;
+    UseyInstance.unshift = unshift;
+    UseyInstance.insert = insert;
     UseyInstance.events = new EventEmitter();
 
     return UseyInstance;
@@ -202,8 +211,21 @@ function Usey (options) {
         }
     }
 
-    function use (fn) {
-        var check, args, chain, name, u;
+    /**
+     * Adds a function, functions or array of functions
+     * 
+     * @param {Number} [index] optional integer position where to add the function
+     * @param {String} [chain] optional named chain to add the function
+     * @param {Function|Array.<Function>} [fn] the function to add or an array of functions
+     * @returns
+     */
+    function use (/*[index,] [chainName,]*/ fn) {
+        var check, args, chain, name, u, index;
+
+        if (typeof fn === 'number') {
+            index = fn;
+            fn = arguments[1];
+        }
 
         if (typeof fn === 'string') {
             name = fn;
@@ -215,6 +237,13 @@ function Usey (options) {
 
         if (arguments.length > 1) {
             fn = Array.prototype.slice.call(arguments)
+
+
+            //if we had an insert index then we need to shift
+            //the arguments over
+            if (typeof index !== 'undefined') {
+                fn.shift();
+            }
 
             //if we have a valid name then we should pull it
             //out of the array so we're just left with the non-name
@@ -239,17 +268,29 @@ function Usey (options) {
                     u.use(initializefn(f));
                 });
 
-                chain.push(u);
+                add(u);
             }
             else {
-                chain.push(initializefn(fn[0]));
+                add(initializefn(fn[0]));
             }
         }
         else {
-            chain.push(initializefn(fn));
+            add(initializefn(fn));
         }
 
         return UseyInstance;
+
+        function add(fn) {
+            if (index === 0) {
+                chain.unshift(fn);
+            }
+            else if (index) {
+                chain.splice(index, 0, fn);
+            }
+            else {
+                chain.push(fn)
+            }
+        }
     }
 
     function initializefn (fn) {
@@ -355,6 +396,33 @@ function Usey (options) {
         while (~(index = root.indexOf(fn))) {
             root.splice(index, 1);
         }
+
+        return UseyInstance;
+    }
+
+    function unshift () {
+        var args = Array.prototype.slice.call(arguments);
+
+        args.unshift(0);
+
+        use.apply(use, args);
+
+        return UseyInstance;
+    }
+
+    function insert (chain, index) {
+        var args = Array.prototype.slice.call(arguments);
+
+        if (typeof chain === 'string') {
+            if (typeof index !== 'number') {
+                throw new Error('insert index must be numeric')
+            }
+
+            args[0] = index;
+            args[1] = chain;
+        }
+
+        use.apply(use, args);
 
         return UseyInstance;
     }

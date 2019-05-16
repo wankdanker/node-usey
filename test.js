@@ -335,6 +335,42 @@ test('events.on() and events.emit() should work', function (t) {
 	});
 });
 
+test('test unshift and unuse', function (t) {
+	u = usey();
+
+	u.use(add1, add1, add1);
+	u.use(add3);
+	u.unshift(mult3);
+
+	u({ x : 1 }, function (err, obj) {
+		t.equal(obj.x, 9);
+
+		u.unuse(add1, true);
+		u({x : 1}, function (err, obj) {
+			t.equal(obj.x, 6);
+			t.end();
+		});
+	});
+});
+
+test('test insert and unuse', function (t) {
+	u = usey();
+
+	u.use(add1, add1, add1);
+	u.use(add3);
+	u.insert(1, mult3);
+
+	u({ x : 1 }, function (err, obj) {
+		t.equal(obj.x, 15);
+
+		u.unuse(add1, true);
+		u({x : 1}, function (err, obj) {
+			t.equal(obj.x, 6);
+			t.end();
+		});
+	});
+});
+
 function add1 (obj, next) {
 	obj.x += 1;
 
@@ -353,6 +389,12 @@ function add3 (obj, next) {
 	return next();
 }
 
+function mult3 (obj, next) {
+	obj.x = obj.x * 3;
+
+	return next();
+}
+
 function passAnError(obj, next) {
 	return next(new Error('Things did not work out'));
 }
@@ -360,3 +402,6 @@ function passAnError(obj, next) {
 function exitSequence(obj, next) {
 	return next('use');
 };
+
+
+

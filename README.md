@@ -87,7 +87,7 @@ function doCleanup (obj, next) {
 usage
 -----
 
-###Create an instance
+### Create an instance
 
 When you create an instance by calling `Usey()`, it returns a function. That
 function has one method: `.use()`.
@@ -110,7 +110,7 @@ to determine where the function was defined. This information is used when debug
 * debug : [function] an optional function that will be called with debug information.
 If not defined, it defaults to using the `debug` module.
 
-###Add middleware/plugins/functions
+### Add middleware/plugins/functions
 
 When you call the `.use()` method, you may pass it a single function, an array
 of functions or many functions as arguments.
@@ -122,7 +122,33 @@ u.use(fn5, fn6, fn7, fn8);
 u.use(fn9);
 ```
 
-###Call the main function
+### Remove middleware/plugins/functions
+
+When you call the `.unuse()` method passing it a function reference, you can remove
+that function from the processing chain.
+
+```js
+u.unuse(fn9);
+```
+
+### Inserting / unshifting middleware/plugins/functions
+
+You can insert a function to specific position using `.insert()` or `.unshift()`
+
+```js
+//put the function f10 at the beginning of a chain
+u.unshift(f10);
+
+//put the function f11 at some specific position
+u.insert(5, f11);
+
+//you can also to it to named chains
+u.unshift('error', logErrorMessage);
+
+u.insert('cleanup', 4, closeDatabase);
+```
+
+### Call the main function
 
 Now when you call `u(arg1, arg2, arg3, ..., function (err, arg1, arg2, arg3, ...){})`,
 it will in turn call, in order:
