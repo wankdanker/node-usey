@@ -1,5 +1,6 @@
 var dephault = require('./dephault');
 var EventEmitter = require('events').EventEmitter;
+var promise = require('./promise');
 
 module.exports = Usey;
 
@@ -61,7 +62,7 @@ function Usey (options) {
             // if the last arg is a function then it's the callback
             , cb = (typeof args[args.length - 1] === 'function')
                 ? args.pop()
-                : null
+                : promise()
             , fn
             , stack = []
             , chain
@@ -75,6 +76,11 @@ function Usey (options) {
 
         push(root, null);
 
+        if (cb.promise) {
+            next();
+            return cb.promise;
+        }
+        
         return next();
 
         function next (err) {
@@ -191,7 +197,16 @@ function Usey (options) {
 
             dbg('Calling: ', fn._name || fn.name);
 
-            return fn.apply(context, args);
+            var r = fn.apply(context, args);
+
+            if (r instanceof Promise) {
+                return r.then(function (data) {
+                    //TODO: what to do with data
+                    return next()
+                }).catch(next);
+            }
+
+            return r;
         }
 
         function push (chain, name) {

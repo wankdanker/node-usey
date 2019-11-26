@@ -16,6 +16,21 @@ test('straight forward usage', function (t) {
 	});
 });
 
+test('straight forward usage with async/await', async function (t) {
+	t.plan(2);
+
+	var u = usey();
+
+	u.use(add1Async).use(add2Async).use(add3Async);
+
+	var [obj1, obj2] = await u({ x : 0 }, {b : 1});
+
+	t.equal(obj1.x, 6);
+	t.equal(obj2.b, 1);
+	t.end();
+	
+});
+
 test('using a sequence', function (t) {
 	t.plan(1);
 
@@ -28,6 +43,20 @@ test('using a sequence', function (t) {
 		t.equal(obj.x, 12);
 		t.end();
 	});
+});
+
+test('using a sequence async/await', async function (t) {
+	t.plan(1);
+
+	var u = usey();
+
+	u.use(add1Async, add2Async, add3Async)
+		.use(add1Async, add2Async, add3Async)
+
+	var [obj] = await u({ x : 0 });
+	
+	t.equal(obj.x, 12);
+	t.end();
 });
 
 test('passing an error to next()', function (t) {
@@ -47,6 +76,28 @@ test('passing an error to next()', function (t) {
 	});
 });
 
+test('passing an error to next() async/await', async function (t) {
+	t.plan(2);
+
+	var u = usey();
+
+	u.use(add1Async)
+		.use(add2Async)
+		.use(passAnErrorAsync)
+		.use(add3Async)
+
+	var obj = { x : 0 }
+
+	try {
+		await u(obj);
+	}
+	catch (err) {
+		t.equal(err.message, 'Things did not work out')
+		t.equal(obj.x, 3);
+		t.end();
+	}
+});
+
 test('exit a sequence early', function (t) {
 	t.plan(2);
 
@@ -61,6 +112,21 @@ test('exit a sequence early', function (t) {
 		t.equal(obj.x, 13);
 		t.end();
 	});
+});
+
+test('exit a sequence early async/await', async function (t) {
+	t.plan(1);
+
+	var u = usey();
+
+	u.use(add1Async, add2Async, add3Async)
+		.use(add1Async, exitSequence, add2Async, add3Async)
+		.use(add1Async, add2Async, add3Async);
+
+	var [obj] = await u({ x : 0 });
+
+	t.equal(obj.x, 13);
+	t.end();
 });
 
 test('anonymous chaining', function (t) {
@@ -389,6 +455,36 @@ function add3 (obj, next) {
 	return next();
 }
 
+function add1Async (obj) {
+	return new Promise(function (resolve, reject) {
+		setTimeout(function () {
+			obj.x += 1;
+
+			resolve(obj);
+		}, 30);
+	});
+}
+
+function add2Async (obj) {
+	return new Promise(function (resolve, reject) {
+		setTimeout(function () {
+			obj.x += 2;
+
+			resolve(obj);
+		}, 20);
+	});
+}
+
+function add3Async (obj) {
+	return new Promise(function (resolve, reject) {
+		setTimeout(function () {
+			obj.x += 3;
+
+			resolve(obj);
+		}, 10);
+	});
+}
+
 function mult3 (obj, next) {
 	obj.x = obj.x * 3;
 
@@ -398,6 +494,15 @@ function mult3 (obj, next) {
 function passAnError(obj, next) {
 	return next(new Error('Things did not work out'));
 }
+
+function passAnErrorAsync(obj) {
+	return new Promise(function (resolve, reject) {
+		setTimeout(function () {
+			reject(new Error('Things did not work out'))
+		}, 10)
+	});
+}
+
 
 function exitSequence(obj, next) {
 	return next('use');
