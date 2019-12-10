@@ -31,6 +31,40 @@ test('straight forward usage with async/await', async function (t) {
 	
 });
 
+test('async/await: pass an error to next()', async function (t) {
+	t.plan(1);
+
+	var u = usey();
+
+	u.use(function (obj1, obj2, next) {
+		return next(new Error('test error'));
+	});
+
+	try {
+		var [obj1, obj2] = await u({ x : 0 }, {b : 1});
+	} catch (e) {
+		t.equal(e.message, 'test error');
+		t.end();
+	}
+});
+
+test('async/await: throw an error', async function (t) {
+	t.plan(1);
+
+	var u = usey();
+
+	u.use(function (obj1, obj2) {
+		throw new Error('test error');
+	});
+
+	try {
+		var [obj1, obj2] = await u({ x : 0 }, {b : 1});
+	} catch (e) {
+		t.equal(e.message, 'test error');
+		t.end();
+	}
+});
+
 test('using a sequence', function (t) {
 	t.plan(1);
 

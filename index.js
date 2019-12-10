@@ -69,6 +69,7 @@ function Usey (options) {
             , timedout = 0
             , timeout
             , dbg = options.debug || debug
+            , cbpromise
             ;
 
         //or unshift
@@ -77,8 +78,11 @@ function Usey (options) {
         push(root, null);
 
         if (cb.promise) {
+            cbpromise = cb.promise;
+
             next();
-            return cb.promise;
+
+            return cbpromise;
         }
         
         return next();
@@ -177,9 +181,9 @@ function Usey (options) {
                 //prevent cb from being called again
                 cb = null;
 
-            		//clean up
-            		stack = null;
-            		UseyInstance = null;
+                //clean up
+                stack = null;
+                UseyInstance = null;
 
                 return r;
             }
