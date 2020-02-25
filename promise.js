@@ -12,7 +12,7 @@ function promise() {
     function cb () {
         var args = Array.prototype.slice.call(arguments);
 
-        if (args[0]) {
+        if (args[0] && args[0] !== 'exit') {
             return rej(args[0]);
         }
 
