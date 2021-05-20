@@ -176,12 +176,12 @@ test('exit a sequence early async/await', async function (t) {
 	var u = usey();
 
 	u.use(add1Async, add2Async, add3Async)
-		.use(add1Async, exitSequence, add2Async, add3Async)
+		.use(add1Async, exitSequenceAsync, add2Async, add3Async)
 		.use(add1Async, add2Async, add3Async);
 
 	var [obj] = await u({ x : 0 });
 
-	t.equal(obj.x, 7);
+	t.equal(obj.x, 13);
 	t.end();
 });
 
@@ -575,6 +575,10 @@ function passAnErrorAsync(obj) {
 function exitSequence(obj, next) {
 	return next('use');
 };
+
+async function exitSequenceAsync(obj) {
+	throw 'use';
+}
 
 
 

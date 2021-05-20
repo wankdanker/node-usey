@@ -201,6 +201,7 @@ function Usey (options) {
 
             dbg('Calling: ', fn._name || fn.name);
 
+            var fnLength = fn.length;
             var r = fn.apply(context, args);
 
             //if the return value of the call to `fn` is a Promise
@@ -209,14 +210,19 @@ function Usey (options) {
             //This indicates that the function we were calling did not
             //have a parameter for `next`. Which means that it will
             //be using the returned Promise to indicate when it's done.
-            if (r instanceof Promise && fn.length < args.length) {
-                return r.then(function (data) {
-                    //TODO: what to do with data
-                    return next()
-                }).catch(next);
+            if (r instanceof Promise) {
+                if (fnLength < args.length) {
+                    r.then(function (data) {
+                        //TODO: what to do with data
+                        return next()
+                    }).catch(function (e) {
+                        return next(e);
+                    });
+                }
             }
-
-            return r;
+            else {
+                return r;
+            }
         }
 
         function push (chain, name) {
