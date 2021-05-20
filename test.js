@@ -93,6 +93,28 @@ test('using a sequence async/await', async function (t) {
 	t.end();
 });
 
+test('using a sequence async/await with an async function that will call next', async function (t) {
+	t.plan(1);
+
+	var u = usey();
+
+	u.use(add1Async, add4AsyncNext, add2Async, add3Async)
+		.use(add4AsyncNext)
+		.use(add1Async, add2Async, add4AsyncNext, add3Async)
+
+	try {
+		var [obj] = await u({ x : 0 });
+		
+		t.equal(obj.x, 24);
+		t.end();
+	}
+	catch (e) {
+		console.log(e)
+		t.fail(e);
+		t.end();
+	}
+});
+
 test('passing an error to next()', function (t) {
 	t.plan(2);
 
@@ -159,7 +181,7 @@ test('exit a sequence early async/await', async function (t) {
 
 	var [obj] = await u({ x : 0 });
 
-	t.equal(obj.x, 13);
+	t.equal(obj.x, 7);
 	t.end();
 });
 
@@ -517,6 +539,18 @@ function add3Async (obj) {
 			resolve(obj);
 		}, 10);
 	});
+}
+
+async function add4AsyncNext (obj, next) {
+	await new Promise(function (resolve, reject) {
+		setTimeout(function () {
+			obj.x += 4;
+
+			resolve(obj);
+		}, 10);
+	});
+	
+	return next(null, obj);
 }
 
 function mult3 (obj, next) {
